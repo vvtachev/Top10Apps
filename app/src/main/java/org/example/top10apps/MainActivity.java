@@ -50,8 +50,6 @@ public class MainActivity extends AppCompatActivity {
         private String downloadXML(String urlPath) {
             StringBuilder xmlResult = new StringBuilder();
 
-            // test change
-
             try {
                 URL url = new URL(urlPath);
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
