@@ -3,6 +3,8 @@ package org.example.top10apps;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -15,11 +17,13 @@ import java.net.URL;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
+    private ListView listApps;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        listApps = findViewById(R.id.xmlListView);
 
         Log.d(TAG, "onCreate: starting AsyncTask");
         DownloadData downloadData = new DownloadData();
@@ -48,6 +52,12 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "onPostExecute: parameter is " + s);
             ParseApplications parseApplications = new ParseApplications();
             parseApplications.parse(s);
+
+            ArrayAdapter<FeedEntry> arrayAdapter = new ArrayAdapter<>(MainActivity.this,
+                    R.layout.list_item,
+                    parseApplications.getApplications());
+
+            listApps.setAdapter(arrayAdapter);
         }
 
         private String downloadXML(String urlPath) {
@@ -61,7 +71,8 @@ public class MainActivity extends AppCompatActivity {
 //                InputStream inputStream = connection.getInputStream();
 //                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
 //                BufferedReader reader = new BufferedReader(inputStreamReader);
-                BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                BufferedReader reader = new BufferedReader(
+                        new InputStreamReader(connection.getInputStream()));
 
                 int charsRead;
                 char[] inputBuffer = new char[500];
@@ -81,7 +92,8 @@ public class MainActivity extends AppCompatActivity {
             } catch (IOException e) {
                 Log.e(TAG, "downloadXML: IO exception reading data " + e.getMessage());
             } catch (SecurityException e) {
-                Log.e(TAG, "downloadXML: Security Exception. Needs permission? " + e.getMessage());
+                Log.e(TAG, "downloadXML: Security Exception. Needs permission? "
+                        + e.getMessage());
             }
 
             return null;
