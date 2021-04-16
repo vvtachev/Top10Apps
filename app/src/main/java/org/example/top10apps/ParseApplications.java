@@ -1,5 +1,7 @@
 package org.example.top10apps;
 
+import android.util.Log;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserFactory;
 
@@ -20,9 +22,9 @@ public class ParseApplications {
 
     public boolean parse(String xmlData) {
         boolean status = true;
-        FeedEntry currentRecord;
+        FeedEntry currentRecord = null;
         boolean inEntry = false;
-        String textValues = "";
+        String textValue = "";
 
         try {
             XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
@@ -32,7 +34,51 @@ public class ParseApplications {
             int eventType = xpp.getEventType();
 
             while (eventType != XmlPullParser.END_DOCUMENT) {
+                String tagName = xpp.getName();
+                switch (eventType) {
+                    case XmlPullParser.START_TAG:
+                        Log.d(TAG, "parse: Starting tag for " + tagName);
+                        if ("entry".equalsIgnoreCase(tagName)) {
+                            inEntry = true;
+                            currentRecord = new FeedEntry();
+                        }
+                        break;
 
+                    case XmlPullParser.TEXT:
+                        textValue = xpp.getText();
+                        break;
+
+                    case XmlPullParser.END_TAG:
+                        Log.d(TAG, "parse: Ending tag for " + tagName);
+                        if (inEntry) {
+                            // to avoid .equalsIgnoreCase on tagName if tagName is null
+                            // we call .equalsIgnoreCase on the String we want to test for
+                            if ("entry".equalsIgnoreCase(tagName)) {
+                                applications.add(currentRecord);
+                                inEntry = false;
+                            } else if ("name".equalsIgnoreCase(tagName)) {
+                                currentRecord.setName(textValue);
+                            } else if ("artist".equalsIgnoreCase(tagName)) {
+                                currentRecord.setArtist(textValue);
+                            } else if ("releaseDate".equalsIgnoreCase(tagName)) {
+                                currentRecord.setReleaseDate(textValue);
+                            } else if ("summary".equalsIgnoreCase(tagName)) {
+                                currentRecord.setReleaseDate(textValue);
+                            } else if ("image".equalsIgnoreCase(tagName)) {
+                                currentRecord.setReleaseDate(textValue);
+                            }
+                        }
+                        break;
+
+                    default:
+                        // Nothing else to do
+                }
+                eventType = xpp.next();
+            }
+
+            for (FeedEntry app : applications) {
+                Log.d(TAG, "parse: ************");
+                Log.d(TAG, app.toString());
             }
 
         } catch (Exception e) {
